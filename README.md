@@ -1,6 +1,6 @@
 # Go Faster with Agents: Build Your Own Claw in Go
 
-GopherCon Europe 2026 Workshop
+Workshop
 
 ## What is this?
 

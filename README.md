@@ -15,8 +15,8 @@ A 7-hour hands-on workshop where you build a claw (always-on autonomous AI agent
 ## Before the Workshop
 
 ```bash
-git clone https://github.com/dmahlow/gceu-workshop-2026.git
-cd gceu-workshop-2026
+git clone https://github.com/dmahlow/claw-workshop-2026.git
+cd claw-workshop-2026
 go version  # should be 1.22+
 ```
 

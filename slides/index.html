@@ -1,0 +1,2549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Faster with Agents - GopherCon Europe 2026</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@5.1.0/dist/reveal.css">
+
+<style>
+:root {
+  --bg-dark: #111827;
+  --bg-card: #1F2937;
+  --bg-terminal: #0D1117;
+  --accent: #3B82F6;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --accent-glow-strong: rgba(59, 130, 246, 0.4);
+  --text-primary: #F0F0F0;
+  --text-muted: #9CA3AF;
+  --text-dim: #4B5563;
+  --green: #00A878;
+  --red: #E06C75;
+  --blue: #61AFEF;
+  --purple: #C678DD;
+  --yellow: #E5C07B;
+  --cyan: #56B6C2;
+}
+
+/* === REVEAL OVERRIDES === */
+.reveal-viewport {
+  background: var(--bg-dark);
+}
+.reveal {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+.reveal .slides {
+  text-align: center;
+}
+.reveal .slides section {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 60px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.reveal h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 3.5em;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 0.3em;
+  text-align: center;
+}
+.reveal h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.8em;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 0.4em;
+  text-align: center;
+}
+.reveal h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2em;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.4em;
+  text-align: center;
+}
+.reveal p {
+  line-height: 1.6;
+  margin-bottom: 0.6em;
+  color: var(--text-muted);
+}
+.reveal ul, .reveal ol {
+  display: block;
+  margin-left: 0;
+  padding-left: 0;
+  text-align: left;
+}
+.reveal li {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.4em;
+  list-style: none;
+  padding-left: 1.2em;
+  position: relative;
+}
+.reveal li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.reveal a {
+  color: var(--accent);
+}
+.reveal strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.reveal code {
+  font-family: 'JetBrains Mono', monospace;
+}
+.reveal .slide-number {
+  color: var(--text-dim);
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* === TEXT UTILITIES === */
+.accent { color: var(--accent) !important; }
+.muted { color: var(--text-muted) !important; }
+.dim { color: var(--text-dim) !important; }
+.green { color: var(--green) !important; }
+.blue { color: var(--blue) !important; }
+.purple { color: var(--purple) !important; }
+.yellow { color: var(--yellow) !important; }
+.cyan { color: var(--cyan) !important; }
+.red { color: var(--red) !important; }
+
+.big-text {
+  font-size: 4em !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  color: var(--text-primary) !important;
+}
+.medium-text {
+  font-size: 1.8em !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+.small-text {
+  font-size: 0.85em !important;
+  font-weight: 400 !important;
+  color: var(--text-muted) !important;
+}
+.mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* === ACCENT BAR === */
+.accent-bar {
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  margin: 20px auto 0;
+  border-radius: 2px;
+}
+
+/* === SECTION LABEL === */
+.section-label {
+  font-size: 0.7em;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5em;
+}
+
+/* === TAGS === */
+.tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-muted);
+  margin: 0 4px;
+}
+.tag.accent-tag {
+  background: rgba(59,130,246,0.15);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--accent);
+}
+
+/* === TERMINAL WINDOW === */
+.terminal-window {
+  background: var(--bg-terminal);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  max-width: 1000px;
+  width: 100%;
+  margin: 20px auto 0;
+  text-align: left;
+}
+.terminal-chrome {
+  background: #1A1F2E;
+  padding: 12px 16px;
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.terminal-dot.red { background: #FF5F57; }
+.terminal-dot.yellow { background: #FFBD2E; }
+.terminal-dot.green { background: #28CA41; }
+.terminal-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.4em;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+.terminal-body {
+  padding: 24px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em;
+  line-height: 1.7;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  overflow: hidden;
+}
+.terminal-body .prompt { color: var(--green); }
+.terminal-body .command { color: var(--text-primary); font-weight: 600; }
+.terminal-body .output { color: var(--text-muted); }
+.terminal-body .highlight { color: var(--accent); font-weight: 600; }
+.terminal-body .file-path { color: var(--cyan); }
+.terminal-body .action { color: var(--blue); }
+.terminal-body .comment { color: var(--text-dim); }
+.terminal-body .keyword { color: var(--purple); }
+.terminal-body .type { color: var(--yellow); }
+.terminal-body .string { color: var(--green); }
+.terminal-body .func { color: var(--blue); }
+.terminal-body .param { color: var(--red); }
+
+/* === EDITOR WINDOW === */
+.editor-window {
+  background: #1E1E2E;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  max-width: 950px;
+  width: 100%;
+  margin: 20px auto 0;
+  text-align: left;
+}
+.editor-chrome {
+  background: #181825;
+  padding: 10px 16px;
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editor-tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em;
+  color: var(--text-muted);
+  background: #1E1E2E;
+  padding: 5px 14px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-bottom: none;
+}
+.editor-tab.active {
+  color: var(--text-primary);
+}
+.editor-body {
+  padding: 20px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.48em;
+  line-height: 1.8;
+  overflow: hidden;
+}
+.editor-line {
+  display: flex;
+  padding: 0 20px;
+}
+.line-number {
+  color: var(--text-dim);
+  min-width: 50px;
+  text-align: right;
+  padding-right: 20px;
+  user-select: none;
+}
+.line-content {
+  flex: 1;
+  white-space: pre-wrap;
+}
+
+/* === COMPARISON LAYOUT === */
+.comparison {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 30px;
+}
+.comparison-col {
+  flex: 1;
+  max-width: 480px;
+}
+.comparison-col h3 {
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+.comparison-col p {
+  font-size: 0.75em;
+}
+.v-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.08);
+  align-self: stretch;
+}
+
+/* === GLOW EFFECTS === */
+.glow-text {
+  text-shadow: 0 0 40px var(--accent-glow-strong), 0 0 80px var(--accent-glow);
+}
+.glow-box {
+  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2) !important;
+}
+
+/* === FLOW DIAGRAM (CSS) === */
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px auto;
+  flex-wrap: wrap;
+}
+.flow-box {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 14px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em;
+  color: var(--text-primary);
+  text-align: center;
+}
+.flow-box.accent-box {
+  background: var(--accent-glow);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--accent);
+}
+.flow-arrow {
+  font-size: 0.7em;
+  color: var(--text-dim);
+}
+
+/* === ARCHITECTURE DIAGRAM === */
+.arch-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 30px auto;
+  max-width: 700px;
+  width: 100%;
+}
+.arch-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+.arch-box {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em;
+  color: var(--text-muted);
+  text-align: center;
+  flex: 1;
+}
+.arch-box.primary {
+  background: var(--accent-glow);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--accent);
+  font-weight: 600;
+}
+.arch-connector {
+  width: 2px;
+  height: 16px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 auto;
+}
+
+/* === CURSOR ANIMATION === */
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 18px;
+  background: var(--text-primary);
+  animation: blink 1.2s step-end infinite;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* === FRAGMENT OVERRIDES === */
+.reveal .fragment {
+  transition: all 0.4s ease;
+}
+.reveal .fragment.fade-up {
+  transform: translateY(20px);
+}
+.reveal .fragment.fade-up.visible {
+  transform: translateY(0);
+}
+
+/* === THREE-COL === */
+.three-col {
+  display: flex;
+  gap: 30px;
+  margin-top: 30px;
+  justify-content: center;
+}
+.three-col > div {
+  flex: 1;
+}
+
+/* === SUBTLE GRID BG === */
+.reveal .slides section {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(59,130,246,0.03) 0%, transparent 70%);
+}
+
+/* === CYCLE DIAGRAM === */
+.cycle-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 30px auto;
+  flex-wrap: wrap;
+}
+.cycle-step {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5em;
+  color: var(--text-primary);
+  text-align: center;
+  min-width: 100px;
+}
+.cycle-step.active {
+  background: var(--accent-glow);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--accent);
+  font-weight: 600;
+}
+.cycle-arrow {
+  font-size: 0.7em;
+  color: var(--text-dim);
+}
+
+/* === TOOL CARD === */
+.tool-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 20px 24px;
+  text-align: center;
+  flex: 1;
+  min-width: 180px;
+}
+.tool-card .tool-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65em;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.tool-card .tool-desc {
+  font-size: 0.5em;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* === ROLE BADGE === */
+.role-badge {
+  text-align: center;
+  width: 140px;
+}
+.role-dot {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+}
+.role-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6em;
+  font-weight: 600;
+}
+
+/* === ENDGAME ARC === */
+.arc-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.arc-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7em;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 32px;
+}
+.arc-label {
+  font-size: 0.65em;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 120px;
+}
+.arc-desc {
+  font-size: 0.55em;
+  color: var(--text-muted);
+}
+
+/* === RESOURCE LINK === */
+.resource-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  max-width: 600px;
+  width: 100%;
+}
+.resource-link .resource-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--accent);
+}
+.resource-link .resource-desc {
+  font-size: 0.5em;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: INTRO -->
+<!-- ============================================================ -->
+
+<!-- Slide 1: Title -->
+<section>
+  <p class="section-label" style="margin-bottom: 0.2em;">GopherCon Europe 2026</p>
+  <h1 style="margin-bottom: 0.1em; font-size: 4em;"><span class="accent glow-text">Go Faster</span><br>with Agents</h1>
+  <h3 style="font-weight: 400; color: var(--text-muted); margin-bottom: 1.2em;">Build Your Own Claw in Go</h3>
+  <div class="accent-bar" style="margin: 0 auto 1.2em;"></div>
+  <p style="font-size: 0.7em; color: var(--text-muted);">Daniel Mahlow &middot; Contiamo &middot; Berlin</p>
+</section>
+
+<!-- Slide 2: About Me -->
+<section>
+  <p class="section-label">About Me</p>
+  <h2>Daniel Mahlow</h2>
+  <p class="fragment fade-up" style="font-size: 0.9em; color: var(--text-primary);">Managing Partner &amp; GenAI Lead at <span class="accent">Contiamo</span>, Berlin</p>
+</section>
+
+<!-- Slide 3: What We're Building -->
+<section>
+  <h2>What we're building today</h2>
+  <div class="fragment fade-up" style="margin: 20px auto; max-width: 420px;">
+    <img src="claw.png" style="width: 100%; border-radius: 12px; opacity: 0.9;">
+  </div>
+  <p class="fragment fade-up medium-text" style="margin-top: 0.5em;">A <span class="accent">claw</span>.</p>
+  <div class="accent-bar"></div>
+</section>
+
+<!-- Slide 4: What is a Claw? -->
+<section>
+  <h2>What is a claw?</h2>
+  <ul style="margin-top: 20px;">
+    <li class="fragment fade-up"><strong>Always-on</strong> - runs continuously, not session-based</li>
+    <li class="fragment fade-up"><strong>Autonomous</strong> - acts without being asked</li>
+    <li class="fragment fade-up"><strong>Persistent memory</strong> - remembers across restarts</li>
+    <li class="fragment fade-up"><strong>Self-scheduling</strong> - creates its own tasks</li>
+    <li class="fragment fade-up"><strong>Acts on your behalf</strong> - your personal agent</li>
+  </ul>
+  <p class="fragment fade-up" style="margin-top: 1em; font-size: 0.75em;">NOT a coding agent. Something different.</p>
+</section>
+
+<!-- Slide 5: The Ecosystem -->
+<section>
+  <h2>The ecosystem</h2>
+  <div class="three-col" style="margin-top: 40px;">
+    <div class="fragment fade-up" style="text-align: center;">
+      <p class="medium-text accent">OpenClaw</p>
+      <p style="font-size: 0.65em;">247K+ stars<br>The reference implementation</p>
+    </div>
+    <div class="fragment fade-up" style="text-align: center;">
+      <p class="medium-text" style="color: var(--cyan);">NanoClaw</p>
+      <p style="font-size: 0.65em;">Lightweight, sandboxed<br>Runs on a Raspberry Pi</p>
+    </div>
+    <div class="fragment fade-up" style="text-align: center;">
+      <p class="medium-text" style="color: var(--yellow);">GoClaw</p>
+      <p style="font-size: 0.65em;">Go reimplementation<br>Multi-tenant gateway</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: Why Go? -->
+<section>
+  <h2>Why <span class="accent">Go</span>?</h2>
+  <div class="terminal-window glow-box" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">why_go.sh</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment">// Goroutines for parallel tool execution</span>
+<span class="keyword">go</span> <span class="func">executeTool</span>(ctx, tool, args)
+
+<span class="comment">// Channels for streaming LLM responses</span>
+tokens := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)
+
+<span class="comment">// Types for tool schemas</span>
+<span class="keyword">type</span> <span class="type">Tool</span> <span class="keyword">interface</span> {
+    <span class="func">Name</span>() <span class="type">string</span>
+    <span class="func">Schema</span>() <span class="type">map[string]any</span>
+    <span class="func">Execute</span>(ctx, args) (<span class="type">string</span>, <span class="type">error</span>)
+}
+
+<span class="comment">// Single binary deployment</span>
+<span class="prompt">$</span> <span class="command">scp myclaw user@server:/usr/local/bin/</span>
+<span class="output">Done. That's it. No runtime.</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: What You'll Actually Learn -->
+<section>
+  <h2>What you'll actually learn</h2>
+  <ul style="margin-top: 20px;">
+    <li class="fragment fade-up">Go concurrency patterns for agent architectures</li>
+    <li class="fragment fade-up">How to steer and validate coding agents</li>
+    <li class="fragment fade-up">LLM tool systems using Go interfaces</li>
+    <li class="fragment fade-up">Patterns that transfer to any LLM integration</li>
+  </ul>
+</section>
+
+<!-- Slide 8: Workshop Flow - Three Acts -->
+<section>
+  <h2>Three acts</h2>
+  <div class="flow-diagram" style="margin-top: 40px;">
+    <div class="flow-box fragment fade-up">
+      <div style="font-size: 1.4em; margin-bottom: 4px;" class="accent">Act 1</div>
+      The Agent Core
+    </div>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">
+        <div style="font-size: 1.4em; margin-bottom: 4px;" class="accent">Act 2</div>
+        From Agent to Claw
+      </div>
+    </span>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box accent-box">
+        <div style="font-size: 1.4em; margin-bottom: 4px;">Act 3</div>
+        A2A + The Maze Heist
+      </div>
+    </span>
+  </div>
+</section>
+
+<!-- Slide 9: Workshop Rhythm -->
+<section>
+  <p class="section-label">Methodology</p>
+  <h2>The rhythm</h2>
+  <div class="cycle-diagram" style="margin-top: 40px;">
+    <div class="cycle-step active fragment fade-up">
+      <div style="font-size: 1.2em; margin-bottom: 4px;">Skill</div>
+      read the instructions
+    </div>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div style="font-size: 1.2em; margin-bottom: 4px;">Implement</div>
+        feed to coding agent
+      </div>
+    </span>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div style="font-size: 1.2em; margin-bottom: 4px;">Review</div>
+        QA the output
+      </div>
+    </span>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div style="font-size: 1.2em; margin-bottom: 4px;">Validate</div>
+        run tests + checks
+      </div>
+    </span>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div style="font-size: 1.2em; margin-bottom: 4px;">Next</div>
+        repeat
+      </div>
+    </span>
+  </div>
+</section>
+
+<!-- Slide 10: How We Work - Skills, Checkpoints, Review Gates -->
+<section>
+  <h2>How we work</h2>
+  <div class="flow-diagram" style="margin-top: 30px;">
+    <div class="flow-box fragment fade-up" style="border-color: rgba(59,130,246,0.3);">
+      <span class="accent" style="font-weight: 700;">Skills</span><br>
+      <span style="font-size: 0.85em; color: var(--text-muted);">Markdown instructions<br>for your coding agent</span>
+    </div>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">
+        <span style="color: var(--green); font-weight: 700;">Checkpoints</span><br>
+        <span style="font-size: 0.85em; color: var(--text-muted);">Full source code<br>to catch up anytime</span>
+      </div>
+    </span>
+    <span class="fragment fade-up" style="display: contents;">
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">
+        <span style="color: var(--blue); font-weight: 700;">Review Gates</span><br>
+        <span style="font-size: 0.85em; color: var(--text-muted);">QA the output<br>with your agent</span>
+      </div>
+    </span>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 30px;">Fell behind? Copy the latest checkpoint and keep going. <span class="accent">This is expected, not a fallback.</span></p>
+</section>
+
+<!-- Slide 11: LiteLLM Proxy -->
+<section>
+  <p class="section-label">Infrastructure</p>
+  <h2>The LLM proxy</h2>
+  <p class="fragment fade-up" style="font-size: 0.95em; color: var(--text-primary); margin-top: 10px;">One endpoint, same model for everyone.</p>
+  <p class="fragment fade-up" style="font-size: 0.85em;">No API key debugging. No "which model are you using?"</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">proxy</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># Your claw points here</span>
+<span class="type">CLAW_BASE_URL</span>=<span class="string">"https://llm-proxy.workshop.dev/v1"</span>  <span class="dim">[announced in session]</span>
+<span class="type">CLAW_API_KEY</span>=<span class="string">"workshop-2026"</span>  <span class="dim">[announced in session]</span>
+<span class="type">CLAW_MODEL</span>=<span class="string">"qwen"</span>
+
+<span class="comment"># LiteLLM proxies to Qwen behind the scenes</span>
+<span class="comment"># OpenAI-compatible API - works with openai-go SDK</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 12: The Maze Heist Teaser -->
+<section>
+  <p class="section-label">The Finale</p>
+  <h2>The Maze Heist</h2>
+  <div style="margin: 30px auto; max-width: 600px; position: relative;">
+    <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; opacity: 0.5;" class="fragment fade-up">
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(59,130,246,0.1); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(0,168,120,0.1); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(97,175,239,0.1); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(59,130,246,0.2); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(229,192,123,0.15); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(0,168,120,0.15); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: var(--bg-card); height: 40px; border-radius: 2px;"></div>
+      <div style="background: rgba(97,175,239,0.15); height: 40px; border-radius: 2px;"></div>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="font-size: 0.9em; color: var(--text-primary);">Your claws will <span class="accent">collaborate</span> to solve a maze together.</p>
+</section>
+
+<!-- Slide 13: Setup Check -->
+<section>
+  <h2>Setup check</h2>
+  <div class="terminal-window" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">setup.sh</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># 1. LiteLLM proxy endpoint</span>
+<span class="prompt">$</span> <span class="command">curl $CLAW_BASE_URL/../health</span>  <span class="dim">[URL announced in session]</span>
+<span class="output">{"status": "ok"}</span>
+
+<span class="comment"># 2. Coding agent ready</span>
+<span class="prompt">$</span> <span class="command">claude --version</span>  <span class="comment"># or gemini, codex, cursor</span>
+<span class="output">Claude Code v4.x.x</span>
+
+<span class="comment"># 3. Repo cloned</span>
+<span class="prompt">$</span> <span class="command">ls gceu_workshop/</span>
+<span class="output">skills/  checkpoints/  docs/  slides/</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 14: Let's Go -->
+<section>
+  <h1 class="accent glow-text">Let's go.</h1>
+  <div class="accent-bar"></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: DEMO 1 - THE AGENT CORE -->
+<!-- ============================================================ -->
+
+<!-- Demo 1 Title -->
+<section>
+  <p class="section-label">Demo 1</p>
+  <h1>The Agent Core</h1>
+  <div class="accent-bar"></div>
+</section>
+
+<!-- The ReAct Loop - Visual Cycle -->
+<section>
+  <h2>The ReAct Loop</h2>
+  <p style="font-size: 0.8em;">Every agent does this. Claude Code, Codex, OpenClaw. All of them.</p>
+  <div class="cycle-diagram fragment fade-up" style="margin-top: 30px;">
+    <div class="cycle-step active" style="padding: 20px 24px;">
+      <div style="font-size: 1.3em; margin-bottom: 6px;">Reason</div>
+      "I need to read<br>the config file"
+    </div>
+    <div class="cycle-arrow">&rarr;</div>
+    <div class="cycle-step" style="padding: 20px 24px;">
+      <div style="font-size: 1.3em; margin-bottom: 6px;">Act</div>
+      read_file(<br>"config.yaml")
+    </div>
+    <div class="cycle-arrow">&rarr;</div>
+    <div class="cycle-step" style="padding: 20px 24px;">
+      <div style="font-size: 1.3em; margin-bottom: 6px;">Observe</div>
+      "port: 8080,<br>debug: true"
+    </div>
+    <div class="cycle-arrow">&rarr;</div>
+    <div class="cycle-step active" style="padding: 20px 24px;">
+      <div style="font-size: 1.3em; margin-bottom: 6px;">Reason</div>
+      "Got it. Now I'll<br>update the port..."
+    </div>
+  </div>
+</section>
+
+<!-- What We're Building - Architecture -->
+<section>
+  <h2>What we're building</h2>
+  <div class="arch-diagram fragment fade-up" style="margin-top: 30px;">
+    <div class="arch-row">
+      <div class="arch-box primary" style="flex: none; width: 300px;">Agent Loop</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">LLM API<br><span style="font-size: 0.8em;" class="dim">openai-go + litellm</span></div>
+      <div class="arch-box">Tool System<br><span style="font-size: 0.8em;" class="dim">interface dispatch</span></div>
+      <div class="arch-box">Streaming<br><span style="font-size: 0.8em;" class="dim">goroutine + channel</span></div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box" style="font-size: 0.9em;">read_file</div>
+      <div class="arch-box" style="font-size: 0.9em;">list_directory</div>
+      <div class="arch-box" style="font-size: 0.9em;">write_file</div>
+      <div class="arch-box" style="font-size: 0.9em;">run_command</div>
+    </div>
+  </div>
+</section>
+
+<!-- The 4 Tools -->
+<section>
+  <h2>Your first 4 tools</h2>
+  <div style="display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap;">
+    <div class="tool-card fragment fade-up">
+      <div class="tool-name">read_file</div>
+      <div class="tool-desc">Read contents of a file<br>from the filesystem</div>
+    </div>
+    <div class="tool-card fragment fade-up">
+      <div class="tool-name">list_directory</div>
+      <div class="tool-desc">List files and folders<br>in a given path</div>
+    </div>
+    <div class="tool-card fragment fade-up">
+      <div class="tool-name">write_file</div>
+      <div class="tool-desc">Create or overwrite<br>a file on disk</div>
+    </div>
+    <div class="tool-card fragment fade-up">
+      <div class="tool-name">run_command</div>
+      <div class="tool-desc">Execute a shell command<br>and return output</div>
+    </div>
+  </div>
+</section>
+
+<!-- The Tool Interface -->
+<section>
+  <h2>The Tool interface</h2>
+  <p style="font-size: 0.8em;">Same pattern as <span class="mono accent">http.Handler</span> - different context.</p>
+  <div class="editor-window" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">tool.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">type</span> <span class="type">Tool</span> <span class="keyword">interface</span> {</span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content">    <span class="func">Name</span>() <span class="type">string</span></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content">    <span class="func">Description</span>() <span class="type">string</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content">    <span class="func">Schema</span>() <span class="type">map[string]any</span></span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content">    <span class="func">Execute</span>(ctx <span class="type">context.Context</span>, args <span class="type">json.RawMessage</span>) (<span class="type">string</span>, <span class="type">error</span>)</span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content">}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Same patterns everywhere -->
+<section>
+  <h2>Same patterns everywhere</h2>
+  <p style="font-size: 0.85em;">The Tool interface you just built is the same core pattern<br>inside every coding agent and harness.</p>
+  <div class="three-col fragment fade-up" style="margin-top: 30px;">
+    <div style="text-align: center;">
+      <p class="medium-text accent">Claude Code</p>
+      <p style="font-size: 0.65em;">Tool interface<br>+ agent loop<br>+ streaming</p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--cyan);">zot</p>
+      <p style="font-size: 0.65em;">Tool interface<br>+ agent loop<br>+ streaming</p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--yellow);">Your claw</p>
+      <p style="font-size: 0.65em;">Tool interface<br>+ agent loop<br>+ streaming</p>
+    </div>
+  </div>
+</section>
+
+<!-- Tool Dispatch Flow -->
+<section>
+  <h2>Tool dispatch flow</h2>
+  <div class="flow-diagram" style="margin-top: 30px; flex-wrap: wrap;">
+    <div class="flow-box fragment fade-up">
+      <span class="yellow">Go struct</span><br>
+      <span class="dim" style="font-size: 0.85em;">your tool</span>
+    </div>
+    <div class="flow-arrow fragment fade-up">&rarr;</div>
+    <div class="flow-box fragment fade-up">
+      <span class="cyan">JSON Schema</span><br>
+      <span class="dim" style="font-size: 0.85em;">parameters</span>
+    </div>
+    <div class="flow-arrow fragment fade-up">&rarr;</div>
+    <div class="flow-box accent-box fragment fade-up">
+      <span style="color: var(--accent);">LLM</span><br>
+      <span class="dim" style="font-size: 0.85em;">picks a tool</span>
+    </div>
+    <div class="flow-arrow fragment fade-up">&rarr;</div>
+    <div class="flow-box fragment fade-up">
+      <span class="blue">Tool Call JSON</span><br>
+      <span class="dim" style="font-size: 0.85em;">name + args</span>
+    </div>
+    <div class="flow-arrow fragment fade-up">&rarr;</div>
+    <div class="flow-box fragment fade-up">
+      <span class="green">Execute</span><br>
+      <span class="dim" style="font-size: 0.85em;">run the tool</span>
+    </div>
+    <div class="flow-arrow fragment fade-up">&rarr;</div>
+    <div class="flow-box fragment fade-up">
+      <span class="purple">Feed back</span><br>
+      <span class="dim" style="font-size: 0.85em;">to the LLM</span>
+    </div>
+  </div>
+</section>
+
+<!-- Streaming -->
+<section>
+  <h2>Streaming</h2>
+  <p style="font-size: 0.85em;" class="fragment fade-up">Without streaming, users stare at a blank screen for 5 seconds.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">streaming.go</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment">// Without streaming:</span>
+<span class="output">$  ......................  </span><span class="dim">(5 seconds later)</span>
+<span class="output">   Here is the complete response all at once.</span>
+
+<span class="comment">// With streaming:</span>
+<span class="output">$  H</span><span class="output">e</span><span class="output">r</span><span class="output">e </span><span class="output">i</span><span class="output">s </span><span class="output">t</span><span class="output">h</span><span class="output">e </span><span class="output">r</span><span class="output">e</span><span class="output">s</span><span class="output">p</span><span class="output">o</span><span class="output">n</span><span class="output">s</span><span class="output">e</span><span class="output">.</span><span class="output">.</span><span class="output">.</span><span class="cursor"></span>
+    </div>
+  </div>
+</section>
+
+<!-- Goroutine + Channel Pattern -->
+<section>
+  <h2>Goroutine + channel</h2>
+  <p style="font-size: 0.8em;">Producer reads SSE, channel delivers to consumer.<br>This pattern recurs <span class="accent">everywhere</span>.</p>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">stream.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content">tokens := <span class="keyword">make</span>(<span class="keyword">chan</span> <span class="type">string</span>)</span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content"><span class="comment">// Producer: reads SSE stream</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content"><span class="keyword">go</span> <span class="keyword">func</span>() {</span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content">    <span class="keyword">for</span> event := <span class="keyword">range</span> stream {</span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content">        tokens <span class="operator">&lt;-</span> event.<span class="func">Delta</span>()</span></div>
+      <div class="editor-line"><span class="line-number">7</span><span class="line-content">    }</span></div>
+      <div class="editor-line"><span class="line-number">8</span><span class="line-content">    <span class="func">close</span>(tokens)</span></div>
+      <div class="editor-line"><span class="line-number">9</span><span class="line-content">}()</span></div>
+      <div class="editor-line"><span class="line-number">10</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">11</span><span class="line-content"><span class="comment">// Consumer: display loop</span></span></div>
+      <div class="editor-line"><span class="line-number">12</span><span class="line-content"><span class="keyword">for</span> tok := <span class="keyword">range</span> tokens {</span></div>
+      <div class="editor-line"><span class="line-number">13</span><span class="line-content">    fmt.<span class="func">Print</span>(tok)</span></div>
+      <div class="editor-line"><span class="line-number">14</span><span class="line-content">}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Security Moment -->
+<section>
+  <h2>Security moment</h2>
+  <div class="terminal-window" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">run_command</span>
+    </div>
+    <div class="terminal-body">
+<span class="highlight">run_command</span> <span class="output">is powerful.</span>
+
+<span class="command">In production:</span>  <span class="action">sandbox, allowlists, container isolation</span>
+<span class="command">In this workshop:</span> <span class="string">trust.</span> <span class="dim">(your laptop, your rules)</span>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 20px; font-size: 0.8em;">Path traversal, arbitrary execution, resource exhaustion.<br>Real claws (NanoClaw, OpenClaw) sandbox <span class="accent">everything</span>.</p>
+</section>
+
+
+<!-- Time to Build - Demo 1 -->
+<section>
+  <h2>Time to build.</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 30px; max-width: 500px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">ls skills/demo_1/</span>
+<span class="file-path">step_1_agent_loop.md</span>
+<span class="file-path">step_2_streaming.md</span>
+<span class="file-path">step_3_more_tools.md</span>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: The Planning Phase -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>The planning phase</h2>
+  <div class="comparison" style="margin-top: 30px;">
+    <div class="comparison-col fragment fade-up">
+      <h3 style="color: var(--red);">Bad</h3>
+      <div class="terminal-window" style="margin-top: 10px;">
+        <div class="terminal-chrome">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+        </div>
+        <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">cat skills/demo_1/step_1_agent_loop.md | claude</span>
+        </div>
+      </div>
+    </div>
+    <div class="v-divider"></div>
+    <div class="comparison-col fragment fade-up">
+      <h3 style="color: var(--green);">Good</h3>
+      <div class="terminal-window" style="margin-top: 10px;">
+        <div class="terminal-chrome">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+        </div>
+        <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">claude</span>
+<span class="output">&gt; We're building a Go agent from scratch.</span>
+<span class="output">&gt; The module is called "myclaw" and uses</span>
+<span class="output">&gt; openai-go. Here's the first skill - read</span>
+<span class="output">&gt; it, plan your approach, then implement</span>
+<span class="output">&gt; step by step.</span>
+<span class="output">&gt; [paste skill]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Why Interfaces -->
+<section>
+  <p class="section-label">Go patterns</p>
+  <h2>Why interfaces?</h2>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">patterns.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="comment">// The LLM doesn't know Go.</span></span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content"><span class="comment">// It sees JSON schema. It returns JSON.</span></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content"><span class="comment">// The interface bridges the gap.</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content"><span class="keyword">type</span> <span class="type">Tool</span> <span class="keyword">interface</span> { ... }    <span class="comment">// your agent</span></span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content"><span class="keyword">type</span> <span class="type">Handler</span> <span class="keyword">interface</span> { ... } <span class="comment">// net/http</span></span></div>
+      <div class="editor-line"><span class="line-number">7</span><span class="line-content"><span class="keyword">type</span> <span class="type">Reader</span> <span class="keyword">interface</span> { ... }  <span class="comment">// io</span></span></div>
+      <div class="editor-line"><span class="line-number">8</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">9</span><span class="line-content"><span class="comment">// Same pattern. Different context.</span></span></div>
+      <div class="editor-line"><span class="line-number">10</span><span class="line-content"><span class="comment">// Go interfaces are the bridge between</span></span></div>
+      <div class="editor-line"><span class="line-number">11</span><span class="line-content"><span class="comment">// typed code and untyped protocols.</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Reviewing Agent Output -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>Review, don't just accept</h2>
+  <div style="display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap;">
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 200px;">
+      <span style="color: var(--accent); font-weight: 700;">Read the code</span><br>
+      <span class="dim" style="font-size: 0.85em;">Does it do what you think?</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 200px;">
+      <span style="color: var(--cyan); font-weight: 700;">Ask it to explain</span><br>
+      <span class="dim" style="font-size: 0.85em;">"Explain the tool dispatch flow"</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 200px;">
+      <span style="color: var(--green); font-weight: 700;">Ask it to visualize</span><br>
+      <span class="dim" style="font-size: 0.85em;">"Draw a mermaid diagram"</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 200px;">
+      <span style="color: var(--purple); font-weight: 700;">Ask it to critique</span><br>
+      <span class="dim" style="font-size: 0.85em;">"Review this for race conditions"</span>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Why Goroutine + Channel -->
+<section>
+  <p class="section-label">Go patterns</p>
+  <h2>Why goroutine + channel?</h2>
+  <div class="comparison" style="margin-top: 30px;">
+    <div class="comparison-col fragment fade-up">
+      <h3 style="color: var(--red);">Callbacks</h3>
+      <p style="font-size: 0.75em;">Nested, hard to reason about, error handling is messy</p>
+    </div>
+    <div class="v-divider"></div>
+    <div class="comparison-col fragment fade-up">
+      <h3 style="color: var(--green);">Channel</h3>
+      <p style="font-size: 0.75em;">Linear flow, composable, reuses everywhere: WebSocket in Demo 2, A2A in Demo 3</p>
+    </div>
+  </div>
+</section>
+
+<!-- Demo 1 Recap: What You Built -->
+<section>
+  <p class="section-label">Demo 1 Complete</p>
+  <h2>What you built</h2>
+  <div class="arch-diagram fragment fade-up" style="margin-top: 20px;">
+    <div class="arch-row">
+      <div class="arch-box primary" style="flex: none; width: 300px;">main.go<br><span style="font-size: 0.8em;" class="dim">Config, client setup, agent wiring</span></div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">agent/<br><span style="font-size: 0.8em;" class="dim">Loop, streaming, message types</span></div>
+      <div class="arch-box">tools/<br><span style="font-size: 0.8em;" class="dim">Interface, registry, 4 tools</span></div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box" style="font-size: 0.9em;">read_file</div>
+      <div class="arch-box" style="font-size: 0.9em;">list_directory</div>
+      <div class="arch-box" style="font-size: 0.9em;">write_file</div>
+      <div class="arch-box" style="font-size: 0.9em;">run_command</div>
+    </div>
+  </div>
+  <div class="flow-diagram fragment fade-up" style="margin-top: 20px;">
+    <div class="flow-box">User input</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box">History</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box accent-box">LLM</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box">Tool call?</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box">Execute</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box accent-box">LLM</div>
+    <span class="flow-arrow">&#8594;</span>
+    <div class="flow-box">Text response</div>
+  </div>
+</section>
+
+<!-- Demo 1 Recap: The Code That Matters -->
+<section>
+  <h2>The code that matters</h2>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">agent/loop.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">func</span> <span class="func">agentTurn</span>(client, model, history, tools, msg) {</span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content">    <span class="keyword">for</span> {</span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content">        stream := client.Chat.Completions.<span class="func">NewStreaming</span>(params)</span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content">        events := <span class="func">streamResponse</span>(stream)</span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content">        <span class="keyword">for</span> event := <span class="keyword">range</span> events {</span></div>
+      <div class="editor-line"><span class="line-number">7</span><span class="line-content">            msg.<span class="func">ReplyTo</span>(event.Text)  <span class="comment">// stream to caller</span></span></div>
+      <div class="editor-line"><span class="line-number">8</span><span class="line-content">        }</span></div>
+      <div class="editor-line"><span class="line-number">9</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">10</span><span class="line-content">        <span class="keyword">if</span> <span class="func">len</span>(toolCalls) == <span class="param">0</span> {</span></div>
+      <div class="editor-line"><span class="line-number">11</span><span class="line-content">            <span class="keyword">return</span>  <span class="comment">// done - text response</span></span></div>
+      <div class="editor-line"><span class="line-number">12</span><span class="line-content">        }</span></div>
+      <div class="editor-line"><span class="line-number">13</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">14</span><span class="line-content">        <span class="keyword">for</span> _, tc := <span class="keyword">range</span> toolCalls {</span></div>
+      <div class="editor-line"><span class="line-number">15</span><span class="line-content">            result := registry.<span class="func">Get</span>(tc.Name).<span class="func">Execute</span>(tc.Args)</span></div>
+      <div class="editor-line"><span class="line-number">16</span><span class="line-content">            history = <span class="func">append</span>(history, <span class="func">toolMessage</span>(result))</span></div>
+      <div class="editor-line"><span class="line-number">17</span><span class="line-content">        }</span></div>
+      <div class="editor-line"><span class="line-number">18</span><span class="line-content">        <span class="comment">// loop back - send tool results to LLM</span></span></div>
+      <div class="editor-line"><span class="line-number">19</span><span class="line-content">    }</span></div>
+      <div class="editor-line"><span class="line-number">20</span><span class="line-content">}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- QA Gate: Demo 1 -->
+<section>
+  <p class="section-label" style="color: var(--green);">QA Gate</p>
+  <h2>Verify your understanding</h2>
+  <p style="font-size: 0.85em; margin-bottom: 20px;">Ask your claw these two things. Read the output carefully.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 10px; max-width: 750px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">qa_gate_1</span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">&gt;</span> <span class="command">Draw a mermaid diagram of the tool dispatch architecture</span>
+
+<span class="prompt">&gt;</span> <span class="command">Explain how the agent decides whether to call a tool or respond with text</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 20px;">If the diagram matches your mental model, you understand what was built.<br>If it doesn't, <span class="accent">ask questions now</span>.</p>
+</section>
+
+<!-- Checkpoint catch-up: Demo 1 -> Demo 2 -->
+<section>
+  <h2>Checkpoint check</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 650px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># Not at checkpoint 4? No worries. Copy it:</span>
+<span class="prompt">$</span> <span class="command">cp -r checkpoints/checkpoint_4_full_agent/* .</span>
+<span class="prompt">$</span> <span class="command">CGO_ENABLED=0 go build -o myclaw .</span>
+<span class="output">Ready for Demo 2.</span>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 20px; font-size: 0.9em; color: var(--text-primary);">Checkpoints exist so nobody gets left behind.<br><span class="accent">Use them. That's what they're for.</span></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: DEMO 2 - FROM AGENT TO CLAW -->
+<!-- ============================================================ -->
+
+<!-- Demo 2 Title -->
+<section>
+  <p class="section-label">Demo 2</p>
+  <h1>From Agent to Claw</h1>
+  <div class="accent-bar"></div>
+</section>
+
+<!-- The Triptych: Agent / Harness / Claw -->
+<section>
+  <h2>Agent / Harness / Claw</h2>
+  <p style="font-size: 0.8em;">Same foundation, different direction.</p>
+  <div class="three-col fragment fade-up" style="margin-top: 30px;">
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--green);">Agent</p>
+      <p style="font-size: 0.65em;">Tool interface<br>Reasoning loop<br>Streaming<br><br><span class="dim">You built this in Demo 1</span></p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--cyan);">Harness</p>
+      <p style="font-size: 0.65em;">+ Intercept hooks<br>+ Skill loading<br>+ Extensions<br><br><span class="dim">Claude Code, zot, Cursor</span></p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text accent">Claw</p>
+      <p style="font-size: 0.65em;">+ Memory<br>+ Scheduling<br>+ Always-on<br><br><span class="dim">You're building this now</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- Three Features -->
+<section>
+  <h2>Three features that cross the line</h2>
+  <div class="flow-diagram" style="margin-top: 40px;">
+    <div class="flow-box fragment fade-up" style="padding: 20px 30px;">
+      <span class="accent" style="font-size: 1.3em; font-weight: 700;">Memory</span><br>
+      <span style="font-size: 0.85em;" class="muted">persistent, on disk</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 20px 30px;">
+      <span class="accent" style="font-size: 1.3em; font-weight: 700;">Scheduling</span><br>
+      <span style="font-size: 0.85em;" class="muted">autonomous tasks</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 20px 30px;">
+      <span class="accent" style="font-size: 1.3em; font-weight: 700;">Web UI</span><br>
+      <span style="font-size: 0.85em;" class="muted">real-time interface</span>
+    </div>
+  </div>
+</section>
+
+<!-- Memory as Markdown -->
+<section>
+  <h2>Memory as markdown</h2>
+  <p style="font-size: 0.8em;">Human-readable, git-friendly, LLM-friendly.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">memories/preferences.md</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment">---</span>
+<span class="type">key</span><span class="output">: preferences</span>
+<span class="type">created</span><span class="output">: 2026-03-16T10:30:00Z</span>
+<span class="type">updated</span><span class="output">: 2026-03-16T14:22:00Z</span>
+<span class="comment">---</span>
+
+<span class="output">User prefers concise answers.</span>
+<span class="output">Timezone: CET (Berlin).</span>
+<span class="output">Go version: 1.24.</span>
+<span class="output">Editor: Neovim.</span>
+    </div>
+  </div>
+</section>
+
+<!-- The Big Refactor - Before/After -->
+<section>
+  <p class="section-label">The Key Slide</p>
+  <h2>The big refactor</h2>
+  <div class="comparison fragment fade-up" style="margin-top: 20px;">
+    <div class="comparison-col">
+      <h3 class="red" style="font-size: 1em;">Before</h3>
+      <div class="terminal-window" style="margin: 0;">
+        <div class="terminal-chrome">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">main.go</span>
+        </div>
+        <div class="terminal-body" style="font-size: 0.9em;">
+<span class="comment">// Blocking stdin loop</span>
+<span class="comment">// One source. One consumer.</span>
+<span class="keyword">for</span> {
+    input := <span class="func">readLine</span>()
+    resp := <span class="func">agent</span>(input)
+    <span class="func">print</span>(resp)
+}
+<span class="dim">// Can't add scheduler.</span>
+<span class="dim">// Can't add WebSocket.</span>
+<span class="dim">// Stuck.</span>
+        </div>
+      </div>
+    </div>
+    <div class="v-divider"></div>
+    <div class="comparison-col">
+      <h3 class="green" style="font-size: 1em;">After</h3>
+      <div class="terminal-window glow-box" style="margin: 0;">
+        <div class="terminal-chrome">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">agent.go</span>
+        </div>
+        <div class="terminal-body" style="font-size: 0.9em;">
+<span class="comment">// Channel-based multiplexing</span>
+<span class="comment">// N sources. One agent.</span>
+<span class="keyword">for</span> msg := <span class="keyword">range</span> ch {
+    resp := <span class="func">agent</span>(msg)
+    msg.<span class="func">ReplyTo</span>(resp)
+}
+<span class="highlight">// Add any source:</span>
+<span class="highlight">// just feed the channel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The Message Struct -->
+<section>
+  <h2>The Message struct</h2>
+  <p style="font-size: 0.8em;">One channel, many sources, same agent.</p>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">message.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">type</span> <span class="type">Message</span> <span class="keyword">struct</span> {</span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content">    Content  <span class="type">string</span></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content">    Source   <span class="type">string</span>  <span class="comment">// "cli", "scheduler", "websocket"</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content">    ReplyTo  <span class="keyword">func</span>(<span class="type">string</span>)</span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content">}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- The Channel Pattern -->
+<section>
+  <h2>One channel, many sources</h2>
+  <p style="font-size: 0.8em;">This is <span class="accent">THE</span> Go pattern.</p>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">agent.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="comment">// Every source feeds one channel</span></span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content"><span class="keyword">for</span> msg := <span class="keyword">range</span> ch {</span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content">    <span class="func">handleMessage</span>(msg) <span class="comment">// CLI, scheduler, WebSocket, A2A</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content">}</span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content"><span class="comment">// Adding a new source:</span></span></div>
+      <div class="editor-line"><span class="line-number">7</span><span class="line-content"><span class="keyword">go</span> <span class="keyword">func</span>() {</span></div>
+      <div class="editor-line"><span class="line-number">8</span><span class="line-content">    <span class="keyword">for</span> task := <span class="keyword">range</span> scheduler.<span class="func">Due</span>() {</span></div>
+      <div class="editor-line"><span class="line-number">9</span><span class="line-content">        ch <span class="operator">&lt;-</span> <span class="type">Message</span>{Content: task, Source: <span class="string">"scheduler"</span>}</span></div>
+      <div class="editor-line"><span class="line-number">10</span><span class="line-content">    }</span></div>
+      <div class="editor-line"><span class="line-number">11</span><span class="line-content">}()</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- embed.FS - One Binary -->
+<section>
+  <h2><span class="mono accent">embed.FS</span></h2>
+  <p style="font-size: 0.9em; color: var(--text-primary);">Your entire claw ships as one binary.</p>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px; max-width: 700px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">web.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="comment">//go:embed static/index.html</span></span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content"><span class="keyword">var</span> staticFS embed.<span class="type">FS</span></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content"><span class="comment">// HTML baked into the binary at compile time</span></span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content"><span class="comment">// No file serving. No Docker. Just scp.</span></span></div>
+    </div>
+  </div>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">deploy.sh</span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">CGO_ENABLED=0 go build -o myclaw .</span>
+<span class="prompt">$</span> <span class="command">ls -lh myclaw</span>
+<span class="output">-rwxr-xr-x  12M  myclaw</span>
+<span class="comment"># Agent + Web UI + WebSocket + Tools. Done.</span>
+    </div>
+  </div>
+</section>
+
+<!-- System Prompt -->
+<section>
+  <h2>System prompt</h2>
+  <p style="font-size: 0.85em;">The personality layer. This is where your claw becomes <span class="accent">yours</span>.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">system_prompt.go</span>
+    </div>
+    <div class="terminal-body">
+<span class="string">"You are a personal assistant claw.</span>
+<span class="string"> You run continuously and act autonomously.</span>
+<span class="string"> You have persistent memory - use it.</span>
+<span class="string"> You can schedule tasks for later.</span>
+<span class="string"> Be concise, be helpful, be proactive."</span>
+
+<span class="comment">// + injected memories</span>
+<span class="comment">// + available tool descriptions</span>
+<span class="comment">// + current time and context</span>
+    </div>
+  </div>
+</section>
+
+<!-- Security: The Three Layers -->
+<section>
+  <p class="section-label">Security</p>
+  <h2>Three layers of defense</h2>
+  <div class="flow-diagram" style="margin-top: 30px;">
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--green); font-weight: 700; font-size: 1.1em;">Tool-level</span><br>
+      <span class="dim" style="font-size: 0.85em;">nono: Landlock / Seatbelt<br>Kernel sandboxing<br>Go bindings available</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--accent); font-weight: 700; font-size: 1.1em;">Credential-level</span><br>
+      <span class="dim" style="font-size: 0.85em;">Phantom token pattern<br>Agent never sees secrets<br>Proxy swaps at boundary</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--purple); font-weight: 700; font-size: 1.1em;">Container-level</span><br>
+      <span class="dim" style="font-size: 0.85em;">Firecracker microVMs<br>gVisor, Docker<br>Full process isolation</span>
+    </div>
+  </div>
+</section>
+
+<!-- Time to Build - Demo 2 -->
+<section>
+  <h2>Time to build.</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 30px; max-width: 500px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">ls skills/demo_2/</span>
+<span class="file-path">step_1_memory.md</span>
+<span class="file-path">step_2_scheduling.md</span>
+<span class="file-path">step_3_web_ui.md</span>
+<span class="file-path">step_4_polish.md</span>  <span class="comment"># discussion only</span>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: System Prompt Engineering -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>System prompt engineering</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 800px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">system_prompt.md</span>
+    </div>
+    <div class="terminal-body">
+<span class="highlight">IN:</span>                            <span class="comment">NOT IN:</span>
+<span class="output">- Identity + personality       - Full conversation history</span>
+<span class="output">- Available capabilities       - All memories (token budget!)</span>
+<span class="output">- Memory instructions          - Implementation details</span>
+<span class="output">- Scheduling instructions      - Error messages</span>
+<span class="output">- Relevant recent memories     - API keys</span>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Why Markdown on Disk -->
+<section>
+  <p class="section-label">Go patterns</p>
+  <h2>Why markdown, not SQLite?</h2>
+  <div class="three-col fragment fade-up" style="margin-top: 30px;">
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--green);">Human-readable</p>
+      <p style="font-size: 0.65em;"><span class="mono">cat memories/preferences.md</span></p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--cyan);">Git-friendly</p>
+      <p style="font-size: 0.65em;"><span class="mono">git diff</span> shows what changed</p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--purple);">LLM-native</p>
+      <p style="font-size: 0.65em;">No serialization layer needed</p>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: The Architecture Moment -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>The architecture moment</h2>
+  <div class="flow-diagram fragment fade-up" style="margin-top: 30px; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+        <div class="flow-box">CLI stdin</div>
+        <div class="flow-box">Scheduler</div>
+        <div class="flow-box">WebSocket</div>
+        <div class="flow-box dim" style="border-style: dashed;">A2A (later)</div>
+      </div>
+      <span class="flow-arrow" style="font-size: 1.2em;">&#8594;</span>
+      <div class="flow-box accent-box" style="padding: 20px 28px; font-weight: 700;">chan Message</div>
+      <span class="flow-arrow" style="font-size: 1.2em;">&#8594;</span>
+      <div class="flow-box" style="padding: 20px 28px;">Agent Loop</div>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: When to Intervene -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>When to intervene</h2>
+  <div class="comparison fragment fade-up" style="margin-top: 30px;">
+    <div class="comparison-col">
+      <h3 style="color: var(--green);">Let it run</h3>
+      <p style="font-size: 0.75em;">Making progress on acceptance criteria</p>
+      <p style="font-size: 0.75em;">Asking clarifying questions</p>
+      <p style="font-size: 0.75em;">Running tests between steps</p>
+    </div>
+    <div class="v-divider"></div>
+    <div class="comparison-col">
+      <h3 style="color: var(--red);">Step in</h3>
+      <p style="font-size: 0.75em;">Circular edits (same code back and forth)</p>
+      <p style="font-size: 0.75em;">Growing complexity (abstractions you didn't ask for)</p>
+      <p style="font-size: 0.75em;">Ignoring errors (retrying the same failing approach)</p>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Recovery Moves -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>When your agent is stuck</h2>
+  <div style="display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap;">
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--green); font-weight: 700;">Fresh start</span><br>
+      <span class="dim" style="font-size: 0.85em;">New conversation.<br>"Start from scratch,<br>here's the skill again."</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--accent); font-weight: 700;">Point to working code</span><br>
+      <span class="dim" style="font-size: 0.85em;">"Read checkpoint_N<br>and match that pattern."</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 260px;">
+      <span style="color: var(--purple); font-weight: 700;">Be specific</span><br>
+      <span class="dim" style="font-size: 0.85em;">Not "fix it" but<br>"the loop exits after one<br>tool call instead of continuing."</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 20px;">Don't ask harder. Ask <span class="accent">differently</span>.</p>
+</section>
+
+<!-- Demo 2 Recap: The Full Claw -->
+<section>
+  <p class="section-label">Demo 2 Complete</p>
+  <h2>The full claw</h2>
+  <div class="arch-diagram fragment fade-up" style="margin-top: 20px;">
+    <div class="arch-row">
+      <div class="arch-box primary" style="flex: none; width: 300px;">main.go</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">agent/<br><span style="font-size: 0.8em;" class="dim">goroutine: agent loop</span></div>
+      <div class="arch-box">web/<br><span style="font-size: 0.8em;" class="dim">goroutine: HTTP server<br>goroutine: WebSocket per client</span></div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">tools/<br><span style="font-size: 0.8em;" class="dim">7 tools</span></div>
+      <div class="arch-box">memory/<br><span style="font-size: 0.8em;" class="dim">markdown on disk</span></div>
+      <div class="arch-box">scheduler/<br><span style="font-size: 0.8em;" class="dim">goroutine: tick</span></div>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;"><span class="dim">goroutine: CLI reader</span> &middot; <span class="dim">goroutine: scheduler tick</span> &middot; <span class="dim">goroutine: HTTP server</span> &middot; <span class="dim">goroutine: WebSocket per client</span> &middot; <span class="dim">goroutine: agent loop</span></p>
+</section>
+
+<!-- Demo 2 Recap: The Goroutine Map -->
+<section>
+  <h2>Five goroutines, one binary</h2>
+  <div class="editor-window fragment fade-up" style="margin-top: 20px;">
+    <div class="editor-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="editor-tab active">main.go</span>
+    </div>
+    <div class="editor-body">
+      <div class="editor-line"><span class="line-number">1</span><span class="line-content"><span class="keyword">func</span> <span class="func">main</span>() {</span></div>
+      <div class="editor-line"><span class="line-number">2</span><span class="line-content">    <span class="keyword">go</span> sched.<span class="func">Run</span>(ctx)          <span class="comment">// scheduler tick</span></span></div>
+      <div class="editor-line"><span class="line-number">3</span><span class="line-content">    <span class="keyword">go</span> webServer.<span class="func">Start</span>(ctx)    <span class="comment">// HTTP + WebSocket</span></span></div>
+      <div class="editor-line"><span class="line-number">4</span><span class="line-content">    <span class="keyword">go</span> agent.<span class="func">StartCLIInput</span>(ch) <span class="comment">// stdin reader</span></span></div>
+      <div class="editor-line"><span class="line-number">5</span><span class="line-content">    <span class="comment">// + 1 goroutine per WebSocket client</span></span></div>
+      <div class="editor-line"><span class="line-number">6</span><span class="line-content"></span></div>
+      <div class="editor-line"><span class="line-number">7</span><span class="line-content">    agent.<span class="func">RunAgent</span>(ctx, ch)    <span class="comment">// agent loop (main goroutine)</span></span></div>
+      <div class="editor-line"><span class="line-number">8</span><span class="line-content">}</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- QA Gate: Demo 2 -->
+<section>
+  <p class="section-label" style="color: var(--green);">QA Gate</p>
+  <h2>Verify your understanding</h2>
+  <p style="font-size: 0.85em; margin-bottom: 20px;">The channel refactor is the most important step. Verify it landed.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 10px; max-width: 750px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">qa_gate_2</span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">&gt;</span> <span class="command">Draw a mermaid diagram showing all goroutines and channels</span>
+
+<span class="prompt">&gt;</span> <span class="command">Explain step by step how a scheduled task reaches the agent loop</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 20px;">If the scheduler path makes sense, everything else will too.<br>If it doesn't, <span class="accent">ask me before lunch</span>.</p>
+</section>
+
+<!-- Checkpoint catch-up: Demo 2 -> Demo 3 -->
+<section>
+  <h2>Checkpoint check</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 650px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># Not at checkpoint 8? Copy it:</span>
+<span class="prompt">$</span> <span class="command">cp -r checkpoints/checkpoint_8_claw/* .</span>
+<span class="prompt">$</span> <span class="command">CGO_ENABLED=0 go build -o myclaw .</span>
+<span class="output">Ready for Demo 3.</span>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 20px; font-size: 0.9em; color: var(--text-primary);">Same deal. <span class="accent">Checkpoints are a feature, not a safety net.</span></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: DEMO 3 - A2A + THE MAZE HEIST -->
+<!-- ============================================================ -->
+
+<!-- Demo 3 Title -->
+<section>
+  <p class="section-label">Demo 3</p>
+  <h1 style="font-size: 3em;">A2A + The Maze Heist</h1>
+  <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Your claws talk to each other. Then they play a game.</p>
+</section>
+
+<!-- MCP vs A2A -->
+<section>
+  <h2>Two protocols, one system</h2>
+  <div class="comparison" style="display: flex; gap: 40px; margin-top: 40px;">
+    <div class="fragment fade-up" style="flex: 1; text-align: center;">
+      <span class="tag" style="background: rgba(198,120,221,0.3); border-color: rgba(198,120,221,0.5); color: var(--purple);">MCP</span>
+      <p style="margin-top: 20px; color: var(--text-muted);">Agent to Tool</p>
+      <p style="font-size: 0.85em; color: var(--text-dim);">Vertical. Agent calls capabilities.<br>"Use this calculator."</p>
+    </div>
+    <div style="width: 1px; background: var(--text-dim);"></div>
+    <div class="fragment fade-up" style="flex: 1; text-align: center;">
+      <span class="tag" style="background: rgba(59,130,246,0.3); border-color: rgba(59,130,246,0.5); color: var(--accent);">A2A</span>
+      <p style="margin-top: 20px; color: var(--text-muted);">Agent to Agent</p>
+      <p style="font-size: 0.85em; color: var(--text-dim);">Horizontal. Peers collaborate.<br>"Ask the other agent."</p>
+    </div>
+  </div>
+</section>
+
+<!-- Agent Cards -->
+<section>
+  <h2>Agent Cards</h2>
+  <p style="color: var(--text-muted); margin-bottom: 20px;">DNS + API docs in one JSON file</p>
+  <div class="terminal-window fragment fade-up" style="max-width: 650px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">/.well-known/agent-card.json</span>
+    </div>
+    <div class="terminal-body">
+{
+  <span class="red">"name"</span>: <span class="string">"My Claw"</span>,
+  <span class="red">"url"</span>: <span class="string">"http://192.168.1.42:8181"</span>,
+  <span class="red">"skills"</span>: [
+    { <span class="red">"id"</span>: <span class="string">"file_ops"</span>, <span class="red">"name"</span>: <span class="string">"File Operations"</span> },
+    { <span class="red">"id"</span>: <span class="string">"memory"</span>, <span class="red">"name"</span>: <span class="string">"Persistent Memory"</span> }
+  ]
+}
+    </div>
+  </div>
+</section>
+
+<!-- It's just HTTP -->
+<section>
+  <h2>A2A is just HTTP</h2>
+  <div style="margin-top: 30px;">
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">JSON-RPC 2.0 over POST</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Your claw is already an HTTP server</p>
+    <p class="fragment fade-up" style="color: var(--accent); font-size: 1.1em;">Adding A2A = adding two routes</p>
+  </div>
+</section>
+
+<!-- Relay architecture -->
+<section>
+  <h2>The relay</h2>
+  <p style="font-size: 0.85em;">Conference WiFi is unpredictable. Your claw polls its inbox on the game server.</p>
+  <div class="flow-diagram fragment fade-up" style="margin-top: 30px;">
+    <div class="flow-box" style="padding: 14px 18px;">
+      <span style="color: var(--green); font-weight: 700;">Your Claw</span>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box accent-box" style="padding: 14px 18px;">
+      <span style="font-weight: 700;">Game Server</span><br>
+      <span class="dim" style="font-size: 0.85em;">/relay/c-7</span>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="padding: 14px 18px;">
+      <span style="color: var(--cyan); font-weight: 700;">Peer Claw</span>
+    </div>
+  </div>
+</section>
+
+<!-- Same channel, new source -->
+<section>
+  <h2>Same channel, new source</h2>
+  <div class="terminal-window fragment fade-up" style="max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">agent/agent.go</span>
+    </div>
+    <div class="terminal-body">
+<span class="keyword">select</span> {
+<span class="keyword">case</span> msg := &lt;-ch:
+  <span class="comment">// Could be from anywhere:</span>
+  <span class="comment">//   CLI       (stdin)</span>
+  <span class="comment">//   WebSocket (browser)</span>
+  <span class="comment">//   Scheduler (background)</span>
+  <span class="comment">//   A2A       (peer agent)  </span><span class="string"> &lt;- new</span>
+  <span class="func">processMessage</span>(msg)
+}
+    </div>
+  </div>
+</section>
+
+<!-- Fan-out/fan-in -->
+<section>
+  <h2>Broadcast: fan-out / fan-in</h2>
+  <div class="terminal-window fragment fade-up" style="max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">tools/broadcast.go</span>
+    </div>
+    <div class="terminal-body">
+<span class="keyword">for</span> _, peer := <span class="keyword">range</span> peers {
+  <span class="keyword">go func</span>(p Peer) {
+    resp := <span class="func">sendMessage</span>(ctx, p.URL, msg)
+    results &lt;- resp  <span class="comment">// fan-in via channel</span>
+  }(peer)
+}
+<span class="comment">// collect all responses, 30s timeout</span>
+    </div>
+  </div>
+</section>
+
+<!-- Live demo moment -->
+<section>
+  <h2 style="color: var(--accent);">Live demo</h2>
+  <div style="margin-top: 30px;">
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Two claws, two ports</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Claw A discovers Claw B</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Claw A asks Claw B a question</p>
+    <p class="fragment fade-up" style="color: var(--text-primary); font-size: 1.1em;">Two AI agents collaborating over HTTP</p>
+  </div>
+</section>
+
+<!-- Time to build A2A -->
+<section>
+  <h2>Time to build.</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 30px; max-width: 500px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="prompt">$</span> <span class="command">ls skills/demo_3/</span>
+<span class="file-path">step_1_a2a_server.md</span>
+<span class="file-path">step_2_a2a_client.md</span>
+<span class="file-path">step_3_connectivity.md</span>
+<span class="file-path">step_4_game_client.md</span>
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Agent Cards -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>Agent Cards</h2>
+  <p style="font-size: 0.85em;">"What can you do?" answered by a JSON file.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 750px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">/.well-known/agent-card.json</span>
+    </div>
+    <div class="terminal-body">
+{
+  <span class="string">"name"</span>: <span class="string">"myclaw"</span>,
+  <span class="string">"description"</span>: <span class="string">"A Go-powered AI agent"</span>,
+  <span class="string">"url"</span>: <span class="string">"http://192.168.1.42:8181"</span>,
+  <span class="string">"skills"</span>: [
+    { <span class="string">"id"</span>: <span class="string">"general"</span>, <span class="string">"name"</span>: <span class="string">"General Assistant"</span> },
+    { <span class="string">"id"</span>: <span class="string">"code"</span>, <span class="string">"name"</span>: <span class="string">"Code Review"</span> }
+  ],
+  <span class="string">"a2a_version"</span>: <span class="string">"0.2.1"</span>
+}
+    </div>
+  </div>
+</section>
+
+<!-- Interstitial: Network Debugging -->
+<section>
+  <p class="section-label">While your agent works</p>
+  <h2>Network checklist</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 750px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># 1. Listen on all interfaces, not just localhost</span>
+<span class="highlight">CLAW_PORT=8181</span>  <span class="comment"># not 8080 (conflicts!)</span>
+
+<span class="comment"># 2. Your IP, not localhost</span>
+<span class="highlight">CLAW_PUBLIC_URL=http://192.168.1.42:8181</span>
+
+<span class="comment"># 3. Test from another machine</span>
+<span class="prompt">$</span> <span class="command">curl http://192.168.1.42:8181/.well-known/agent-card.json</span>
+
+<span class="comment"># 4. If WiFi blocks it: pair up, test locally first</span>
+    </div>
+  </div>
+</section>
+
+<!-- The Maze Heist intro -->
+<section>
+  <p class="section-label" style="color: #ffd700;">The Maze Heist</p>
+  <h1 style="font-size: 2.8em; margin-top: 10px;">50 claws. One maze.<br>One crown jewel.</h1>
+  <div class="accent-bar" style="background: #ffd700;"></div>
+</section>
+
+<!-- How it works -->
+<section>
+  <h2>The rules</h2>
+  <div style="margin-top: 20px;">
+    <p class="fragment fade-up" style="color: var(--text-muted);">Your claw controls an explorer in the maze</p>
+    <p class="fragment fade-up" style="color: var(--text-muted);">Fog of war - you only see what you've explored</p>
+    <p class="fragment fade-up" style="color: var(--text-muted);">Locked doors need specific roles to open</p>
+    <p class="fragment fade-up" style="color: var(--text-muted);">Some doors need <span class="accent">your</span> help - Go coding challenges</p>
+    <p class="fragment fade-up" style="color: var(--text-primary);">Share maps via A2A. Coordinate. Find the jewel.</p>
+  </div>
+</section>
+
+<!-- Roles - More Prominent -->
+<section>
+  <h2>Five roles</h2>
+  <p style="font-size: 0.85em; margin-bottom: 10px;">Assigned on join. ~10 per role. You'll need each other.</p>
+  <div style="display: flex; justify-content: center; gap: 40px; margin-top: 30px; flex-wrap: wrap;">
+    <div class="role-badge fragment fade-up" style="text-align: center;">
+      <img src="sprites/role_rogue.png" style="width: 64px; height: 64px; image-rendering: pixelated; margin-bottom: 8px;">
+      <div class="role-name" style="color: #ff6b6b;">Rogue</div>
+      <p style="font-size: 0.45em; color: var(--text-dim); margin-top: 4px;">bypass locks</p>
+    </div>
+    <div class="role-badge fragment fade-up" style="text-align: center;">
+      <img src="sprites/role_mage.png" style="width: 64px; height: 64px; image-rendering: pixelated; margin-bottom: 8px;">
+      <div class="role-name" style="color: #4ecdc4;">Mage</div>
+      <p style="font-size: 0.45em; color: var(--text-dim); margin-top: 4px;">dispel wards</p>
+    </div>
+    <div class="role-badge fragment fade-up" style="text-align: center;">
+      <img src="sprites/role_knight.png" style="width: 64px; height: 64px; image-rendering: pixelated; margin-bottom: 8px;">
+      <div class="role-name" style="color: #ff9f43;">Knight</div>
+      <p style="font-size: 0.45em; color: var(--text-dim); margin-top: 4px;">break barriers</p>
+    </div>
+    <div class="role-badge fragment fade-up" style="text-align: center;">
+      <img src="sprites/role_sage.png" style="width: 64px; height: 64px; image-rendering: pixelated; margin-bottom: 8px;">
+      <div class="role-name" style="color: #a29bfe;">Sage</div>
+      <p style="font-size: 0.45em; color: var(--text-dim); margin-top: 4px;">decode intel</p>
+    </div>
+    <div class="role-badge fragment fade-up" style="text-align: center;">
+      <img src="sprites/role_ranger.png" style="width: 64px; height: 64px; image-rendering: pixelated; margin-bottom: 8px;">
+      <div class="role-name" style="color: #feca57;">Ranger</div>
+      <p style="font-size: 0.45em; color: var(--text-dim); margin-top: 4px;">fast recon</p>
+    </div>
+  </div>
+</section>
+
+<!-- Multi-agent door mechanic -->
+<section>
+  <h2>Every door needs 2+ agents</h2>
+  <p style="font-size: 0.9em; color: var(--text-primary); margin-bottom: 10px;">Solo is impossible.</p>
+  <div style="display: flex; gap: 24px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 220px;">
+      <span style="color: #ff6b6b; font-weight: 700; font-size: 1.1em;">Role Door</span><br>
+      <span class="dim" style="font-size: 0.85em;">2-3 of same role<br>"Rogue door (1/2)"</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 220px;">
+      <span style="color: var(--cyan); font-weight: 700; font-size: 1.1em;">Mixed Door</span><br>
+      <span class="dim" style="font-size: 0.85em;">2-3 different roles<br>"Needs mage + knight"</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 220px;">
+      <span style="color: var(--yellow); font-weight: 700; font-size: 1.1em;">Challenge Door</span><br>
+      <span class="dim" style="font-size: 0.85em;">3-5 humans solve code<br>"2/4 keys submitted"</span>
+    </div>
+    <div class="flow-box fragment fade-up" style="padding: 16px 20px; max-width: 220px;">
+      <span style="color: #ffd700; font-weight: 700; font-size: 1.1em;">Harness Door</span><br>
+      <span class="dim" style="font-size: 0.85em;">Implement a guard hook<br>"Add a before-tool filter"</span>
+    </div>
+  </div>
+</section>
+
+<!-- Why N > 1 -->
+<section>
+  <h2>Why 50 claws beat 1</h2>
+  <div style="margin-top: 30px;">
+    <p class="fragment fade-up" style="color: var(--text-muted);">Parallel exploration - 50x faster fog clearing</p>
+    <p class="fragment fade-up" style="color: var(--text-muted);">Role distribution - no single claw has all roles</p>
+    <p class="fragment fade-up" style="color: var(--text-muted);">Map sharing via A2A - communicating claws find paths faster</p>
+    <p class="fragment fade-up" style="color: var(--accent);">50 humans solving Go challenges simultaneously</p>
+  </div>
+</section>
+
+<!-- Human challenges -->
+<section>
+  <h2>Human-in-the-loop</h2>
+  <p style="color: var(--text-muted); margin-bottom: 20px;">Some doors need you, not your claw</p>
+  <div class="terminal-window fragment fade-up" style="max-width: 650px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">Your claw's web UI</span>
+    </div>
+    <div class="terminal-body">
+<span class="action">I found a locked door that needs a key!</span>
+<span class="action">Challenge: Write a Go function that</span>
+<span class="action">returns the Fibonacci number at position N.</span>
+<span class="action">The key is the result for N=20.</span>
+
+<span class="highlight">Write the code, run it, paste the key here.</span>
+    </div>
+  </div>
+</section>
+
+<!-- Endgame Crescendo -->
+<section>
+  <h2>The endgame crescendo</h2>
+  <p style="font-size: 0.8em; margin-bottom: 15px;">When the first claw reaches the jewel chamber...</p>
+  <div style="max-width: 650px; width: 100%;">
+    <div class="arc-step fragment fade-up">
+      <span class="arc-number">01</span>
+      <span class="arc-label">Discovery</span>
+      <span class="arc-desc">A pulse from the jewel. "ALL EXPLORERS: CONVERGE."</span>
+    </div>
+    <div class="arc-step fragment fade-up">
+      <span class="arc-number">02</span>
+      <span class="arc-label">Convergence</span>
+      <span class="arc-desc">50 dots streaming inward on the big screen. Fog clears along paths.</span>
+    </div>
+    <div class="arc-step fragment fade-up">
+      <span class="arc-number">03</span>
+      <span class="arc-label">The Crack</span>
+      <span class="arc-desc">Energy beams converge. Shield cracks. Charge meter: 3/8... 6/8... 7/8...</span>
+    </div>
+    <div class="arc-step fragment fade-up">
+      <span class="arc-number">04</span>
+      <span class="arc-label" style="color: #ffd700;">Shatter</span>
+      <span class="arc-desc">Full maze reveal. All paths traced in role colors. Every person contributed.</span>
+    </div>
+  </div>
+</section>
+
+<!-- Demo 3 Recap: The Complete System -->
+<section>
+  <p class="section-label">Demo 3 Complete</p>
+  <h2>One binary.</h2>
+  <div class="arch-diagram fragment fade-up" style="margin-top: 20px;">
+    <div class="arch-row">
+      <div class="arch-box primary" style="flex: none; width: 300px;">main.go</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">agent/</div>
+      <div class="arch-box">web/</div>
+      <div class="arch-box">a2a/</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-box">tools/<br><span style="font-size: 0.8em;" class="dim">16 tools</span></div>
+      <div class="arch-box">memory/</div>
+      <div class="arch-box">scheduler/</div>
+      <div class="arch-box">peers/</div>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 5px; font-size: 0.65em; color: var(--text-dim);">Goroutines: agent loop, scheduler, HTTP server, N WebSocket clients, CLI reader</p>
+</section>
+
+<!-- Demo 3 Recap: The Final Tool Count -->
+<section>
+  <h2>16 tools</h2>
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px; align-items: center;">
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">read_file</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">list_directory</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">write_file</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">run_command</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">remember</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">recall</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">schedule</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">discover_peer</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">ask_peer</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">broadcast</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">find_peer_with_skill</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">join_game</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">move</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">look</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">use_ability</div>
+      </div>
+      <div class="tool-card fragment fade-up" style="min-width: 150px;">
+        <div class="tool-name">submit_key</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Game-ready catch-up -->
+<section>
+  <h2>Game-ready check</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># Claw running and network-reachable? Great.</span>
+<span class="comment"># If not:</span>
+<span class="prompt">$</span> <span class="command">cp -r checkpoints/checkpoint_10_game_ready/* .</span>
+<span class="prompt">$</span> <span class="command">CGO_ENABLED=0 go build -o myclaw .</span>
+<span class="prompt">$</span> <span class="command">CLAW_BASE_URL=... CLAW_API_KEY=... CLAW_PORT=8181 \</span>
+<span class="command">  CLAW_PUBLIC_URL=http://YOUR_IP:8181 ./myclaw</span>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 20px; font-size: 0.9em; color: var(--text-primary);"><span class="accent">Everyone plays.</span> The game doesn't care who built what.</p>
+</section>
+
+<!-- Let's play -->
+<section>
+  <h2 style="font-size: 2.5em; color: var(--accent);">Let's play.</h2>
+  <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em; margin-top: 20px;">Everyone joined? Dots on the big screen?<br>Now we build your claw's abilities, round by round.</p>
+</section>
+
+<!-- Round 0: Join -->
+<section>
+  <p class="section-label" style="color: #ffd700;">Round 0</p>
+  <h2>Join the game</h2>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 700px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">join</span>
+    </div>
+    <div class="terminal-body">
+<span class="comment"># Set the game server URL</span>
+<span class="type">GAME_SERVER_URL</span>=<span class="string">"http://ANNOUNCED:9090"</span>  <span class="dim">[announced in session]</span>
+
+<span class="comment"># Tell your claw:</span>
+<span class="output">"Join the game at $GAME_SERVER_URL"</span>
+
+<span class="comment"># You should see:</span>
+<span class="output">Joined! Explorer ID: c-7, Role: rogue, Position: (3, 12)</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;">Your dot should appear on the big screen. If not, check your <span class="mono accent">CLAW_PUBLIC_URL</span> and <span class="mono accent">GAME_SERVER_URL</span>.</p>
+</section>
+
+<!-- Round 1: Move -->
+<section>
+  <p class="section-label" style="color: #ffd700;">Round 1</p>
+  <h2>Move</h2>
+  <p style="font-size: 0.9em; color: var(--text-muted);">Make your claw move. Random, clockwise, whatever. Just make it move.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 600px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">POST /api/move</span>
+    </div>
+    <div class="terminal-body">
+<span class="type">Request</span>:  {"explorer_id": "c-7", "direction": "north"}
+<span class="type">Response</span>: {"success": true, "position": {"x": 5, "y": 3}, "message": "Moved north."}
+
+<span class="comment">// direction: "north" | "south" | "east" | "west"</span>
+<span class="comment">// Add an auto-explore loop: ticker + feed the channel</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;">Hint: <span class="mono accent">hints/01_move.md</span> &middot; 10 min build, 3 min watch</p>
+</section>
+
+<!-- Round 2: Look -->
+<section>
+  <p class="section-label" style="color: #ffd700;">Round 2</p>
+  <h2>Look Before You Leap</h2>
+  <p style="font-size: 0.9em; color: var(--text-muted);">Your claw is blind. Give it eyes. Look before you move.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 600px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">POST /api/look</span>
+    </div>
+    <div class="terminal-body">
+<span class="type">Request</span>:  {"explorer_id": "c-7"}
+<span class="type">Response</span>: Text description of surroundings:
+  exits, locked doors, other explorers, items
+
+<span class="comment">// Update your auto-explore: look first, then choose</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;">Hint: <span class="mono accent">hints/02_look.md</span> &middot; 10 min build, 3 min watch</p>
+</section>
+
+<!-- Round 3: Doors + Coordinate -->
+<section>
+  <p class="section-label" style="color: #ffd700;">Round 3</p>
+  <h2>Doors + Coordinate</h2>
+  <p style="font-size: 0.9em; color: var(--text-muted);">Your claw has a role. Use your ability on matching doors.<br>Broadcast doors you can't open.</p>
+  <div class="terminal-window fragment fade-up" style="margin-top: 20px; max-width: 600px;">
+    <div class="terminal-chrome">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-title">POST /api/ability</span>
+    </div>
+    <div class="terminal-body">
+<span class="type">Request</span>:  {"explorer_id": "c-7", "target": "door-3"}
+<span class="type">Response</span>: {"success": false, "message": "2/3 rogues present", "status": "Rogue door (2/3)"}
+
+<span class="comment">// Your role doesn't match? Broadcast: "Found mage</span>
+<span class="comment">// door door-3 at (8,5), need 1 more mage!"</span>
+    </div>
+  </div>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;">Hint: <span class="mono accent">hints/03_doors.md</span> &middot; 10 min build, 8 min watch</p>
+</section>
+
+<!-- Round 4: The Crown Jewel -->
+<section>
+  <p class="section-label" style="color: #ffd700;">Round 4</p>
+  <h2>The Crown Jewel</h2>
+  <p style="font-size: 0.9em; color: var(--text-muted);">When you see a golden glow, go toward it.<br>When coordinates are broadcast, converge.</p>
+  <p class="fragment fade-up" style="font-size: 0.85em; color: var(--text-primary); margin-top: 20px;">Your explorer already handles this. But can you make it <span class="accent">faster</span>?</p>
+  <p class="fragment fade-up small-text" style="margin-top: 10px;">Optional: tune convergence behavior - drop exploration,<br>beeline for the jewel coordinates. One-line change, big impact on the charge meter.</p>
+  <p class="fragment fade-up small-text" style="margin-top: 15px;">Hint: <span class="mono accent">hints/04_jewel.md</span> &middot; 3 min prompt, then watch the endgame</p>
+</section>
+
+<!-- Budget 10 minutes for wrap-up, not 5 -->
+<!-- ============================================================ -->
+<!-- SECTION 5: WRAP-UP -->
+<!-- ============================================================ -->
+
+<!-- Wrap-up Title -->
+<section>
+  <p class="section-label">Wrap-up</p>
+  <h1 style="font-size: 2.5em;">What you built today</h1>
+</section>
+
+<!-- What You Built -->
+<section>
+  <h2>What you built today</h2>
+  <div class="three-col fragment fade-up" style="margin-top: 30px;">
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--green);">Agent Patterns</p>
+      <p style="font-size: 0.65em;">Tool interface + registry<br>Reasoning loop<br>SSE streaming<br>Context propagation</p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text accent">Claw Features</p>
+      <p style="font-size: 0.65em;">Persistent memory<br>Autonomous scheduling<br>Web UI + WebSocket<br>Channel multiplexing</p>
+    </div>
+    <div style="text-align: center;">
+      <p class="medium-text" style="color: var(--cyan);">Networking</p>
+      <p style="font-size: 0.65em;">A2A protocol<br>Peer discovery<br>Fan-out / fan-in<br>Collaborative game</p>
+    </div>
+  </div>
+  <p class="fragment fade-up" style="margin-top: 30px; color: var(--accent); font-size: 1em;">These patterns power Claude Code, zot, OpenClaw, and your claw.</p>
+</section>
+
+<!-- The real skills -->
+<section>
+  <h2>The real takeaway</h2>
+  <div style="margin-top: 30px;">
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">How to direct coding agents effectively</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1.1em;">Go concurrency patterns for agent architectures</p>
+    <p class="fragment fade-up" style="color: var(--text-primary); font-size: 1.1em;">Patterns that transfer to any LLM integration</p>
+  </div>
+</section>
+
+<!-- What's Next -->
+<section>
+  <h2>What's next</h2>
+  <div style="margin-top: 30px;">
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1em;">Keep building your claw - add tools, refine the system prompt</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1em;">Add messaging - Slack, Telegram, email as input sources</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1em;">Deploy it - single binary, run anywhere, systemd or Docker</p>
+    <p class="fragment fade-up" style="color: var(--text-muted); font-size: 1em;">Extend with MCP - connect to databases, APIs, third-party tools</p>
+    <p class="fragment fade-up" style="color: var(--accent); font-size: 1em;">Build agents for your team, your org, your life</p>
+  </div>
+</section>
+
+<!-- Resources -->
+<section>
+  <h2>Resources</h2>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">OpenClaw</div>
+        <div class="resource-desc">The reference claw implementation - github.com/openclaw</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">A2A Protocol Spec</div>
+        <div class="resource-desc">Agent-to-Agent protocol - a2a-protocol.org</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">openai-go SDK</div>
+        <div class="resource-desc">Official Go client - github.com/openai/openai-go</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">a2a-go SDK</div>
+        <div class="resource-desc">A2A for Go - github.com/a2aproject/a2a-go</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">nono</div>
+        <div class="resource-desc">Agent sandboxing + credential proxy - nono.sh</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">zot</div>
+        <div class="resource-desc">Go agent harness reference - github.com/patriceckhart/zot</div>
+      </div>
+    </div>
+    <div class="resource-link fragment fade-up">
+      <div>
+        <div class="resource-name">Workshop Repo</div>
+        <div class="resource-desc">All skills, checkpoints, and reference code</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Thank you -->
+<section>
+  <h1 style="font-size: 3em;">Thank you.</h1>
+  <p style="color: var(--text-muted); margin-top: 20px;">Daniel Mahlow</p>
+  <p style="color: var(--text-dim);">Contiamo, Berlin</p>
+  <p class="fragment fade-up" style="color: var(--accent); margin-top: 30px;">github.com/dmahlow</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+var isPreview = new URLSearchParams(window.location.search).has('preview');
+Reveal.initialize({
+  hash: !isPreview,
+  width: 1920,
+  height: 1080,
+  margin: isPreview ? 0 : 0.04,
+  minScale: 0.01,
+  maxScale: 2.0,
+  transition: isPreview ? 'none' : 'fade',
+  transitionSpeed: 'default',
+  backgroundTransition: isPreview ? 'none' : 'fade',
+  center: true,
+  slideNumber: !isPreview,
+  controls: !isPreview,
+  progress: !isPreview,
+  history: !isPreview,
+  keyboard: !isPreview,
+  touch: !isPreview
+}).then(function() {
+  // In preview mode, listen for postMessage from parent cockpit
+  if (isPreview) {
+    window.addEventListener('message', function(e) {
+      if (e.data && typeof e.data.gotoSlide === 'number') {
+        Reveal.layout();
+        var f = (typeof e.data.gotoFragment === 'number' && e.data.gotoFragment >= 0)
+          ? e.data.gotoFragment : undefined;
+        Reveal.slide(e.data.gotoSlide, 0, f);
+      }
+    });
+    return;
+  }
+
+  // Presenter cockpit sync via BroadcastChannel
+  var cockpitChannel = new BroadcastChannel('gceu-slides');
+  cockpitChannel.onmessage = function(e) {
+    var data = e.data;
+    if (data.action === 'next') Reveal.next();
+    else if (data.action === 'prev') Reveal.prev();
+    else if (data.action === 'goto') Reveal.slide(data.indexh || 0);
+  };
+
+  function broadcastState() {
+    var state = Reveal.getState();
+    cockpitChannel.postMessage({
+      event: 'statechanged',
+      indexh: state.indexh,
+      indexf: typeof state.indexf === 'number' ? state.indexf : -1,
+      total: Reveal.getTotalSlides()
+    });
+  }
+  Reveal.on('slidechanged', broadcastState);
+  Reveal.on('fragmentshown', broadcastState);
+  Reveal.on('fragmenthidden', broadcastState);
+  broadcastState();
+});
+</script>
+</body>
+</html>

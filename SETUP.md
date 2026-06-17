@@ -30,7 +30,13 @@ You should get a JSON response with a message.
 
 Use your own coding agent (Claude Code, Cursor, Gemini CLI, Codex) with your own API key/subscription. The proxy above is only for the claw you build during the workshop.
 
-## 5. Build and run
+## 5. Game server (Demo 3)
+
+```bash
+export GAME_SERVER_URL="https://macbook-pro-3.taila8c4.ts.net/game"
+```
+
+## 6. Build and run
 
 ```bash
 CGO_ENABLED=0 go build -o myclaw .
